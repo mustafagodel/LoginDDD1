@@ -3,15 +3,15 @@ import { Container, inject, injectable } from 'inversify';
 import { User } from './User';
 import { DatabaseConnector } from '../../database/db';
 
-
 @injectable()
 export class UserRepository {
+    mysqlConnection: Connection;
+    constructor(@inject(DatabaseConnector) private databaseConnector: DatabaseConnector) {
+        this.mysqlConnection = this.databaseConnector.getConnection();
+      }
   
-    
-    constructor(@inject(DatabaseConnector) private mysqlConnection: Connection) {}
-    
-
     async findByUsername(username: string, password: string): Promise<User | undefined> {
+         this.mysqlConnection
         const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
         return new Promise<User | undefined>((resolve, reject) => {
             this.mysqlConnection.execute(query, [username, password], (err, results: RowDataPacket[]) => {
@@ -32,7 +32,7 @@ export class UserRepository {
     async add(user: User): Promise<void> {
         const query = 'INSERT INTO users (username, password) VALUES (?, ?)';
         return new Promise<void>((resolve, reject) => {
-            this.mysqlConnection.query(query, [user.username, user.password], (err) => {
+            this.mysqlConnection.execute(query, [user.username, user.password], (err) => {
                 if (err) {
                     reject(err);
                 } else {

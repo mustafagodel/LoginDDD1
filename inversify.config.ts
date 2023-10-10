@@ -1,4 +1,4 @@
-// inversify.config.ts
+
 
 import { Container } from 'inversify';
 import { DatabaseConnector } from './src/database/db';

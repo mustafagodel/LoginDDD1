@@ -15,22 +15,24 @@ export class UserController {
     private initRoutes() {
         this.router.post('/register', async (req: Request, res: Response) => {
             const { username, password } = req.body;
-
+        
             try {
                 const message = await this.userService.register(username, password);
                 res.json({ message });
             } catch (error) {
+                console.error('Kayıt hatası:', error);
                 res.status(500).json({ error: 'Registration failed.' });
             }
         });
-
+        
         this.router.post('/login', async (req: Request, res: Response) => {
             const { username, password } = req.body;
-
+        
             try {
                 const message = await this.userService.login(username, password);
                 res.json({ message });
             } catch (error) {
+                console.error('Kayıt hatası:', error);
                 res.status(401).json({ error: 'Login failed.' });
             }
         });

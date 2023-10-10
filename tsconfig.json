@@ -1,0 +1,26 @@
+
+{
+  "compilerOptions": {
+    "target": "ES2020", // Hedef JavaScript sürümü
+    "module": "CommonJS", // Modül sistemi (örneğin, CommonJS)
+    "outDir": "./dist", // Derlenen dosyaların çıkış dizini
+    "strict": true, // Sıkı TypeScript tür denetimi
+    "esModuleInterop": true, // ESM (ECMAScript Modülleri) ile uyumlu hale getirme
+    "skipLibCheck": true, // @types paketlerini denetlememe
+    "forceConsistentCasingInFileNames": true, // Dosya adlarının büyük/küçük harfe duyarlılığını zorlama
+    "declaration": false, // .d.ts deklarasyon dosyaları oluşturma
+    "moduleResolution": "node", // Modül çözümleme stratejisi (örneğin, Node.js)
+    "jsx": "react", // JSX dili (React projeleri için)
+    "rootDir": "./src", // Kaynak kod dosyalarının bulunduğu dizin
+    "baseUrl": "./", // Bağlantıların (import) kök dizini
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "paths": {
+      // Bağlantıların (import) çözümleme yolları
+      // Örnek: "myModule": ["./src/myModule"]
+    },
+    "typeRoots": ["./node_modules/@types"] // TypeScript tür tanımları için kök dizinler
+  },
+  "include": ["src/**/*.ts"], // Derlemeye dahil edilecek dosyaların glob deseni
+  "exclude": ["node_modules"] // Derlemeye dahil edilmeyecek dizinler
+}

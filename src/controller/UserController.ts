@@ -14,31 +14,33 @@ export class UserController {
 
     private initRoutes() {
         this.router.post('/register', async (req: Request, res: Response) => {
-            const { username, password } = req.body;
-        
-            try {
+            ErrorCatch(async () => {
+                const { username, password } = req.body;
                 const message = await this.userService.register(username, password);
                 res.json({ message });
-            } catch (error) {
-                console.error('Kayıt hatası:', error);
-                res.status(500).json({ error: 'Registration failed.' });
-            }
+            }, req, res);
         });
         
         this.router.post('/login', async (req: Request, res: Response) => {
-            const { username, password } = req.body;
-        
-            try {
+            ErrorCatch(async () => {
+                const { username, password } = req.body;
                 const message = await this.userService.login(username, password);
                 res.json({ message });
-            } catch (error) {
-                console.error('Kayıt hatası:', error);
-                res.status(401).json({ error: 'Login failed.' });
-            }
+            }, req, res);
         });
     }
 
     getRouter(): Router {
         return this.router;
+    }
+}
+
+
+async function ErrorCatch(routeFn: (req: Request, res: Response) => Promise<void>, req: Request, res: Response) {
+    try {
+        await routeFn(req, res);
+    } catch (error) {
+        console.error('Eroor:', error);
+        res.status(500).json({ error: 'Something Went Wrong' });
     }
 }

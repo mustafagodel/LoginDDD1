@@ -1,7 +1,7 @@
 import { injectable } from 'inversify';
 import { UserService } from '../domain/Users/UserService';
 import ErrorTryCatch from '../infrastructure/errorcatch';
-import { Request, Response } from 'express'; // express modülünü içe aktarıyoruz
+import { Request, Response } from 'express'; 
 
 @injectable()
 export class UserApplicationService {

@@ -9,7 +9,7 @@ class ErrorTryCatch {
         try {
             await routeFn(req, res);
         } catch (error) {
-            console.error('Erro:', error);
+            console.error('Error:', error);
             res.status(500).json({ error: 'Something Went Error' });
         }
     }

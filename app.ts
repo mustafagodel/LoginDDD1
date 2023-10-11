@@ -20,7 +20,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 
 const userController = container.get<UserController>(UserController);
-app.use('/domain', userController.getRouter());
+app.use('/api', userController.getRouter());
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);

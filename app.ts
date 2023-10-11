@@ -4,7 +4,7 @@ import express from 'express';
 import 'reflect-metadata';
 import bodyParser from 'body-parser';
 import { Container } from 'inversify'; 
-import configureContainer from './inversify.config'; 
+import configureContainer from './src/infrastructure/inversify.config'
 import { UserController } from './src/controller/UserController';
 
 const app = express();

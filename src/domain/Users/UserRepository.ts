@@ -1,7 +1,7 @@
 import { Connection, RowDataPacket } from 'mysql2';
 import { Container, inject, injectable } from 'inversify';
 import { User } from './User';
-import { DatabaseConnector } from '../../database/db';
+import { DatabaseConnector } from '../../infrastructure/db';
 
 @injectable()
 export class UserRepository {

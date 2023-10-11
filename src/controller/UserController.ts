@@ -2,7 +2,7 @@ import { Request, Response, Router } from 'express';
 import { UserService } from '../domain/Users/UserService';
 import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
-
+import ErrorTryCatch from '../infrastructure/errorcatch';
 @injectable()
 export class UserController {
     private readonly router: Router;
@@ -14,7 +14,7 @@ export class UserController {
 
     private initRoutes() {
         this.router.post('/register', async (req: Request, res: Response) => {
-            ErrorCatch(async () => {
+            ErrorTryCatch.catchErrors(async () => {
                 const { username, password } = req.body;
                 const message = await this.userService.register(username, password);
                 res.json({ message });
@@ -22,7 +22,7 @@ export class UserController {
         });
         
         this.router.post('/login', async (req: Request, res: Response) => {
-            ErrorCatch(async () => {
+            ErrorTryCatch.catchErrors(async () => {
                 const { username, password } = req.body;
                 const message = await this.userService.login(username, password);
                 res.json({ message });
@@ -36,11 +36,4 @@ export class UserController {
 }
 
 
-async function ErrorCatch(routeFn: (req: Request, res: Response) => Promise<void>, req: Request, res: Response) {
-    try {
-        await routeFn(req, res);
-    } catch (error) {
-        console.error('Eroor:', error);
-        res.status(500).json({ error: 'Something Went Wrong' });
-    }
-}
+

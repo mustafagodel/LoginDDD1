@@ -21,6 +21,6 @@ export class UserService {
         }
         const newUser = new User(username, password);
         await this.userRepository.add(newUser);
-        return 'User added successfully';
+    return 'User added successfully';
     }
 }

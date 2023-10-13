@@ -1,57 +1,45 @@
 import { Request, Response, Router } from 'express';
 import { UserService } from '../domain/Users/UserService';
 import { inject, injectable } from 'inversify';
+import Outmiddleware from '../middleware/Outmiddleware';
 import 'reflect-metadata';
+import { UserApplicationService } from '../appservices/UserApplicationService'; 
 import jwt from 'jsonwebtoken';
 import express from 'express';
+require('dotenv').config();
 
 @injectable()
 export class UserController {
     private readonly router: Router;
-    private Key = 'mustafagodel';
+    private readonly userAppService: UserApplicationService; 
 
     constructor(@inject(UserService) private userService: UserService) {
         this.router = express.Router();
-        this.initRoutes();
+        this.userAppService = new UserApplicationService(userService);
+                this.initRoutes();
     }
 
     private initRoutes() {
         this.router.post('/register', async (req: Request, res: Response) => {
             const { username, password } = req.body;
-            const insertedUser = await this.userService.register(username, password);
-            if (insertedUser == 'User added successfully') {
-                res.json({
-                    code: 0,
-                    message: 'User added successfully',
-                    data: {},
-                });
+            const insertedUser = await this.userAppService.registerUser(username, password);
+            if (insertedUser.code === 0) {
+                res.json(insertedUser);
             } else {
-                res.status(400).json({
-                    code: 1,
-                    message: 'This username is already in use!',
-                });
+                res.status(401).json(insertedUser);
             }
         });
 
-        this.router.post('/login', async (req: Request, res: Response) => {
+        this.router.post('/login',async (req: Request, res: Response) => {
             const { username, password } = req.body;
-            const isUserLogin = await this.userService.login(username, password);
-
-            if (isUserLogin == 'Login successful!') {
-                const token = jwt.sign({ username }, this.Key);
-                res.json({
-                    code: 0,
-                    message: 'Login successful!',
-                    data: {
-                        token,
-                    },
-                });
+            const response = await this.userAppService.loginUser(username, password);
+        
+            if (response.code === 0) {
+                res.json(response);
             } else {
-                res.status(401).json({
-                    code: 1,
-                    message: 'Incorrect Username or Password!',
-                });
+                res.status(401).json(response);
             }
+            this.router.use(Outmiddleware);
         });
     }
 

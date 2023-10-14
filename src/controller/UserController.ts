@@ -1,7 +1,7 @@
 import { Request, Response, Router } from 'express';
 import { UserService } from '../domain/Users/UserService';
 import { inject, injectable } from 'inversify';
-import Outmiddleware from '../middleware/Outmiddleware';
+import Outmiddleware from '../middleware/AuthMiddleware';
 import 'reflect-metadata';
 import { UserApplicationService } from '../appservices/UserApplicationService'; 
 import jwt from 'jsonwebtoken';
@@ -18,7 +18,6 @@ export class UserController {
         this.userAppService = new UserApplicationService(userService);
                 this.initRoutes();
     }
-
     private initRoutes() {
         this.router.post('/register', async (req: Request, res: Response) => {
             const { username, password } = req.body;
@@ -39,8 +38,11 @@ export class UserController {
             } else {
                 res.status(401).json(response);
             }
-            this.router.use(Outmiddleware);
+          
         });
+        this.router.get('/token', Outmiddleware, (req, res) => {
+            res.json({ message: 'This is a token route', user: req.user });
+          });
     }
 
     getRouter(): Router {

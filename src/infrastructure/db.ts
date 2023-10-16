@@ -1,28 +1,28 @@
-
-import mysql, { Connection } from 'mysql2';
-import { injectable } from 'inversify';
-
+import { MongoClient, Db } from 'mongodb';
+import { inject, injectable } from 'inversify';
 @injectable()
-export class DatabaseConnector {
-    private connection: Connection;
-
+export class MongoDBConnector {
+    private client: MongoClient;
+    private db: Db;
     constructor() {
-        this.connection = mysql.createConnection({
-            host: 'localhost',
-            user: 'root',
-            password: 'root1234',
-            database: 'database1',
+        this.client = new MongoClient('mongodb://localhost:27017', {
+        
         });
-        this.connection.connect((err) => {
-            if (err) {
-                console.error('MySQL connection error:', err);
-                throw err;
-            }
-            console.log('MySQL connected.');
-        });
+        this.db = this.client.db("Database1"); 
     }
 
-    getConnection(): Connection {
-        return this.connection;
+    async connect() {
+        try {
+            await this.client.connect();
+            this.db = this.client.db('Database1'); 
+            console.log('MongoDB bağlantısı başarılı.');
+        } catch (error) {
+            console.error('MongoDB bağlantı hatası:', error);
+            throw error;
+        }
+    }
+
+    getDb(): Db { 
+        return this.db;
     }
 }

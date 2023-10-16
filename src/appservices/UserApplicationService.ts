@@ -1,30 +1,34 @@
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { UserService } from '../domain/Users/UserService';
 import jwt from 'jsonwebtoken';
 import {ApiResponse} from '../infrastructure/ApiResponse';
-
+import  PasswordService  from '../infrastructure/PasswordService';
 
 
 require('dotenv').config();
 
 @injectable()
 export class UserApplicationService {
-    constructor(private userService: UserService) {}
+   
+    constructor(private userService: UserService) {
+
+    }
 
     async registerUser(username: string, password: string): Promise<ApiResponse<any>> {
         const message = await this.userService.register(username, password);
-        if (message === 'Login successful!') {
+ 
+        if (message) {
         return new ApiResponse(0, 'User added successfully', message);
         }else {
             return new ApiResponse(0, 'No user added', message);
         }
     }
 
-    async loginUser(username: string, password: string): Promise<ApiResponse<{ token: string } | string>> {
+    async loginUser(username: string, password: string): Promise<ApiResponse<{ token: string } | any>> {
         const message = await this.userService.login(username, password);
-   
-   
-        if (message === 'Login successful!') {
+
+    
+        if (message) {
             const secretKey = process.env.SECRET_KEY;
         
             if (!secretKey || typeof secretKey !== 'string') {
@@ -36,7 +40,7 @@ export class UserApplicationService {
             console.log(`Token after successful login: ${token}`);
             return new ApiResponse(0, 'Login successful', { token });
         } else {
-            return new ApiResponse(1, 'Incorrect Username or Password', message);
+            return new ApiResponse(1, 'Incorrect Username or Password', false);
         }
         
         

@@ -1,43 +1,58 @@
-import { Connection, RowDataPacket } from 'mysql2';
-import { Container, inject, injectable } from 'inversify';
+import { Collection } from 'mongodb';
+import { inject, injectable } from 'inversify';
 import { User } from './User';
-import { DatabaseConnector } from '../../infrastructure/db';
+import { MongoDBConnector } from '../../infrastructure/db';
+import  PasswordService  from '../../infrastructure/PasswordService';
 
 @injectable()
 export class UserRepository {
-    mysqlConnection: Connection;
-    constructor(@inject(DatabaseConnector) private databaseConnector: DatabaseConnector) {
-        this.mysqlConnection = this.databaseConnector.getConnection();
-      }
-      async findByUsername(username: string, password: string): Promise<{ success: boolean; user?: User }> {
-        this.mysqlConnection;
-        const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
-        return new Promise<{ success: boolean; user?: User }>((resolve, reject) => {
-            this.mysqlConnection.execute(query, [username, password], (err, results: RowDataPacket[]) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    if (results && results.length > 0) {
-                        const user = new User(results[0].username, results[0].password);
-                        resolve({ success: true, user });
-                    } else {
-                        resolve({ success: false });
-                    }
-                }
-            });
-        });
+    private collection: Collection | undefined;
+    private passwordService: PasswordService;
+    constructor(@inject(MongoDBConnector) private databaseConnector: MongoDBConnector,@inject(PasswordService) passwordService: PasswordService) {
+        databaseConnector.connect();
+        this.collection = databaseConnector.getDb()?.collection('users'); 
+        this.passwordService = passwordService;
+    }
+   
+
+    async findByUsername(username: string, password: string): Promise<{ success: boolean; user?: User }> {
+        if (!this.collection) {
+            return { success: false };
+        }
+
+        try {
+            const hashedPassword = this.passwordService.hashPassword(password);
+            const userDoc = await this.collection.findOne({ username, password: hashedPassword });
+
+            if (!userDoc) {
+                return { success: false };
+            }
+
+            const user: User = new User(userDoc.username, userDoc.password);
+
+            return { success: true, user };
+        } catch (error) {
+            console.error('MongoDB sorgusu hatası:', error);
+            throw error;
+        }
     }
 
     async add(user: User): Promise<{ success: boolean }> {
-        const query = 'INSERT INTO users (username, password) VALUES (?, ?)';
-        return new Promise<{ success: boolean }>((resolve, reject) => {
-            this.mysqlConnection.execute(query, [user.username, user.password], (err) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve({ success: true });
-                }
-            });
-        });
-    }
+        // if (!this.collection) {
+        //     return { success: false };
+        // }
+
+       try {
+  const result = await this.collection!.insertOne(user);
+  if (result.acknowledged) {
+    return { success: true };
+  } else {
+    console.error('Ekleme işlemi başarısız:', result.acknowledged);
+    return { success: false };
+  }
+} catch (error) {
+  console.error('MongoDB ekleme hatası:', error);
+  return { success: false };
 }
+    }}
+

@@ -2,11 +2,11 @@ import express from 'express';
 import 'reflect-metadata';
 import bodyParser from 'body-parser';
 import { Container } from 'inversify';
-import configureContainer from './src/infrastructure/inversify.config';
-import { UserController } from './src/controller/UserController';
-import Middleware from './src/middleware/ExecptionMiddleware';
-import { UserApplicationService } from './src/appservices/UserApplicationService'
-
+import configureContainer from './infrastructure/inversify.config';
+import { UserController } from './controller/UserController';
+import Middleware from './middleware/ExecptionMiddleware';
+import { UserApplicationService } from './appservices/UserApplicationService'
+import  PasswordService  from './infrastructure/PasswordService';
 require('dotenv').config();
 
 const app = express();
@@ -17,13 +17,14 @@ configureContainer(container);
 
 app.use(Middleware);
 
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const userController = container.get<UserController>(UserController);
 
 
-app.use('/api', userController.getRouter());
+app.use('/api',userController.getRouter());
 
 
 

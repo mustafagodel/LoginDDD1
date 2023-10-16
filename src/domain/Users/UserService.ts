@@ -1,38 +1,49 @@
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { UserRepository } from './UserRepository';
 import { User } from './User';
+import  { PasswordService } from '../../infrastructure/PasswordService';
 
 @injectable()
 export class UserService {
-    constructor(public userRepository: UserRepository) {}
-
-    async login(username: string, password: string): Promise<string> {
-        const result = await this.userRepository.findByUsername(username, password);
-        if (result.success) {
-            const user = result.user;
-            if (user && user.password === password) {
-                return 'Login successful!';
-            }
-        }
-        return 'Incorrect Username or Password!';
+    private passwordService: PasswordService;
+    constructor(public userRepository: UserRepository,@inject(PasswordService) passwordService: PasswordService) {
+        this.passwordService = passwordService;
     }
 
-    async register(username: string, password: string): Promise<string> {
-        const existingUserResult = await this.userRepository.findByUsername(username, password);
-        if (existingUserResult.success) {
-            const existingUser = existingUserResult.user;
-            if (existingUser) {
-                return 'This username is already in use!';
+    async login(username: string, password: string): Promise<boolean> {
+        const result = await this.userRepository.findByUsername(username, password);
+        const hashedPassword = this.passwordService.hashPassword(password);;
+        if (result.success) {
+            const user = result.user;
+            if (user && hashedPassword === hashedPassword) {
+                return true;
             }
         }
+        return false;
+    }
 
-        const newUser = new User(username, password);
+    async register(username: string, password: string): Promise<boolean> {
+        const existingUserResult = await this.userRepository.findByUsername(username, password);
+        const hashedPassword = this.passwordService.hashPassword(password);
+        if (existingUserResult.success) {
+            const existingUser = existingUserResult.user;
+        
+            if (existingUser) {
+                const inputPasswordHash =this.passwordService.hashPassword(password);
+                if (inputPasswordHash === existingUser.password) {
+                    return false;
+                }
+            }
+        }
+     
+        const newUser = new User(username, hashedPassword);
         const addUserResult = await this.userRepository.add(newUser);
         if (addUserResult.success) {
-            return 'User added successfully';
+            return true;
         }
 
-        return 'User registration failed'; 
+        return false; 
+
         
     }
 }
